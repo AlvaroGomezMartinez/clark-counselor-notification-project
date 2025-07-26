@@ -3,4 +3,6 @@
 
 # Allow specific files
 !Code.js
+!SimpleTestFramework.js
+!SimpleTests.js
 !appsscript.json
