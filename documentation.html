@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clark Counselor Notification System - API Documentation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #2980b9;
+            margin-top: 25px;
+        }
+        .function {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .function-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #d63384;
+            font-family: 'Courier New', monospace;
+        }
+        .parameters {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 3px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .returns {
+            background: #d1ecf1;
+            border: 1px solid #b6d4fe;
+            border-radius: 3px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .example {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .tag {
+            display: inline-block;
+            background: #6c757d;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+        .tag.param { background: #fd7e14; }
+        .tag.returns { background: #20c997; }
+        .tag.throws { background: #dc3545; }
+        .tag.since { background: #6f42c1; }
+        .toc {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .toc li {
+            margin: 5px 0;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #495057;
+        }
+        .toc a:hover {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Clark Counselor Notification System</h1>
+        <p><strong>Version:</strong> 2.0.0 | <strong>Author:</strong> Alvaro Gomez | <strong>Project Lead:</strong> Wendy Gomez</p>
+        
+        <div class="toc">
+            <h3>📚 Table of Contents</h3>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#main-functions">Main Functions</a></li>
+                <li><a href="#validation-functions">Validation Functions</a></li>
+                <li><a href="#email-functions">Email Functions</a></li>
+                <li><a href="#utility-functions">Utility Functions</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+            </ul>
+        </div>
+
+        <h2 id="overview">📋 Overview</h2>
+        <p>Automated email notification system that processes Google Form submissions and sends counselor requests to appropriate staff members based on student information and request urgency levels.</p>
+
+        <h2 id="main-functions">🚀 Main Functions</h2>
+
+        <div class="function">
+            <div class="function-name">onFormSubmit(e)</div>
+            <p><strong>Description:</strong> Main form submission handler and email dispatcher. Processes Google Form submissions, validates data, determines appropriate counselor routing, sends email notifications, and updates spreadsheet checkboxes.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Object} e</code> - Form submission event object from Google Forms<br>
+                <span class="tag param">@param</span> <code>{Array&lt;string&gt;} e.values</code> - Array of form response values
+            </div>
+
+            <div class="returns">
+                <strong>Throws:</strong><br>
+                <span class="tag throws">@throws</span> <code>{Error}</code> When counselor email mapping is not found<br>
+                <span class="tag throws">@throws</span> <code>{Error}</code> When form validation fails
+            </div>
+
+            <div class="example">
+                <strong>Example:</strong><br>
+                <pre>const mockEvent = {
+  values: ['timestamp', 'student@email.com', 'Gomez (Cas-Fl)', '12345', 'Doe', 'John']
+};
+onFormSubmit(mockEvent);</pre>
+            </div>
+            <span class="tag since">@since 1.0.0</span>
+        </div>
+
+        <div class="function">
+            <div class="function-name">addCheckboxesToCounselorSheets()</div>
+            <p><strong>Description:</strong> Adds checkboxes to column K starting in row 2 for specified counselor sheets. Iterates through predefined counselor sheet names and adds checkboxes for tracking completed requests.</p>
+            
+            <div class="returns">
+                <strong>Throws:</strong><br>
+                <span class="tag throws">@throws</span> <code>{Error}</code> When spreadsheet access fails or sheet operations error
+            </div>
+
+            <div class="example">
+                <strong>Example:</strong><br>
+                <pre>// Called automatically on form submission
+addCheckboxesToCounselorSheets();</pre>
+            </div>
+            <span class="tag since">@since 2.0.0</span>
+        </div>
+
+        <h2 id="validation-functions">✅ Validation Functions</h2>
+
+        <div class="function">
+            <div class="function-name">validateFormEvent(e)</div>
+            <p><strong>Description:</strong> Validates the form submission event to ensure it contains required data.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Object} e</code> - Form submission event object
+            </div>
+
+            <div class="returns">
+                <strong>Returns:</strong><br>
+                <span class="tag returns">@returns</span> <code>{boolean}</code> True if valid, false otherwise
+            </div>
+        </div>
+
+        <div class="function">
+            <div class="function-name">validateFormData(formData)</div>
+            <p><strong>Description:</strong> Validates required form data fields including firstName, lastName, counselorName, and reason.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Object} formData</code> - Parsed form data
+            </div>
+
+            <div class="returns">
+                <strong>Returns:</strong><br>
+                <span class="tag returns">@returns</span> <code>{boolean}</code> True if valid, false otherwise
+            </div>
+        </div>
+
+        <div class="function">
+            <div class="function-name">parseFormData(values)</div>
+            <p><strong>Description:</strong> Parses form data into a structured object with named properties instead of array indices.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Array} values</code> - Form response values
+            </div>
+
+            <div class="returns">
+                <strong>Returns:</strong><br>
+                <span class="tag returns">@returns</span> <code>{Object}</code> Parsed form data with structured properties
+            </div>
+        </div>
+
+        <h2 id="email-functions">📧 Email Functions</h2>
+
+        <div class="function">
+            <div class="function-name">composeEmail(formData)</div>
+            <p><strong>Description:</strong> Composes the email subject and body with improved formatting and clear sections.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Object} formData</code> - Parsed form data
+            </div>
+
+            <div class="returns">
+                <strong>Returns:</strong><br>
+                <span class="tag returns">@returns</span> <code>{Object}</code> Email data with subject and body properties
+            </div>
+        </div>
+
+        <div class="function">
+            <div class="function-name">sendRegularEmail(emailData, counselorEmail)</div>
+            <p><strong>Description:</strong> Sends regular email to specific counselor with both plain text and HTML formatting.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Object} emailData</code> - Email subject and body<br>
+                <span class="tag param">@param</span> <code>{string} counselorEmail</code> - Target counselor email address
+            </div>
+        </div>
+
+        <div class="function">
+            <div class="function-name">sendEmergencyEmail(emailData, allEmails)</div>
+            <p><strong>Description:</strong> Sends emergency email to all counselors when urgent requests are submitted.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Object} emailData</code> - Email subject and body<br>
+                <span class="tag param">@param</span> <code>{Array} allEmails</code> - Array of all counselor email addresses
+            </div>
+        </div>
+
+        <h2 id="utility-functions">🔧 Utility Functions</h2>
+
+        <div class="function">
+            <div class="function-name">isEmergencyRequest(formData)</div>
+            <p><strong>Description:</strong> Determines if the request is an emergency requiring all counselors to be notified.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Object} formData</code> - Parsed form data
+            </div>
+
+            <div class="returns">
+                <strong>Returns:</strong><br>
+                <span class="tag returns">@returns</span> <code>{boolean}</code> True if emergency, false otherwise
+            </div>
+        </div>
+
+        <div class="function">
+            <div class="function-name">buildReasonSpecificContent(formData)</div>
+            <p><strong>Description:</strong> Builds reason-specific email content with better formatting for different request types.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Object} formData</code> - Parsed form data
+            </div>
+
+            <div class="returns">
+                <strong>Returns:</strong><br>
+                <span class="tag returns">@returns</span> <code>{string}</code> Formatted reason-specific content
+            </div>
+        </div>
+
+        <div class="function">
+            <div class="function-name">sendErrorNotificationEmail(error)</div>
+            <p><strong>Description:</strong> Sends error notification email to administrator when script execution fails.</p>
+            
+            <div class="parameters">
+                <strong>Parameters:</strong><br>
+                <span class="tag param">@param</span> <code>{Error} error</code> - The error object to report
+            </div>
+        </div>
+
+        <h2 id="configuration">⚙️ Configuration</h2>
+
+        <div class="function">
+            <div class="function-name">CONFIG</div>
+            <p><strong>Description:</strong> Main configuration object containing admin email, form column indices, and system settings.</p>
+            
+            <div class="example">
+                <strong>Properties:</strong><br>
+                <pre>CONFIG = {
+  ADMIN_EMAIL: 'alvaro.gomez@nisd.net',
+  EMAIL_SUBJECT: 'REQUEST TO SEE COUNSELOR',
+  EMERGENCY_URGENCY: 'Red (It is an emergency...)',
+  FORM_COLUMNS: {
+    STUDENT_EMAIL: 1,
+    COUNSELOR_NAME: 2,
+    STUDENT_ID: 3,
+    // ... more columns
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="function">
+            <div class="function-name">COUNSELOR_EMAILS</div>
+            <p><strong>Description:</strong> Email mapping configuration with separate PRODUCTION and TESTING environments.</p>
+            
+            <div class="example">
+                <strong>Usage:</strong><br>
+                <pre>// Switch between environments
+const counselorEmails = COUNSELOR_EMAILS.TESTING; // or .PRODUCTION</pre>
+            </div>
+        </div>
+
+        <div class="function">
+            <div class="function-name">REASON_TYPES</div>
+            <p><strong>Description:</strong> Predefined constants for counselor request reason types to ensure consistency.</p>
+            
+            <div class="example">
+                <strong>Available Types:</strong><br>
+                <pre>REASON_TYPES = {
+  ACADEMIC: 'Academic (4 Year Planning...)',
+  SCHEDULING: 'Scheduling Concerns...',
+  PERSONAL: 'Personal Issues',
+  COLLEGE_CAREER: 'College & Career Planning...',
+  OTHER: 'Other'
+}</pre>
+            </div>
+        </div>
+
+        <hr style="margin: 40px 0;">
+        <p style="text-align: center; color: #6c757d; font-size: 0.9em;">
+            Generated on July 26, 2025 | Clark Counselor Notification System v2.0.0
+        </p>
+    </div>
+</body>
+</html>
