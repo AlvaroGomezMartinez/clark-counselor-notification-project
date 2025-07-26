@@ -3,7 +3,7 @@
 ## Overview
 Automated email notification system that sends counselor requests to appropriate staff members based on Google Form submissions.
 
-**Project Lead:** Wendy Gomez, Counselor  ### Troubleshooting
+**Project Lead:** Wendy Gomez, Counselor, Clark H.S., Northside ISD
 
 ### Common Issues
 - **"No email found for counselor"**: Check counselor name mapping in form vs. `COUNSELOR_EMAILS`
@@ -52,17 +52,7 @@ runEdgeCaseTests();     // Test edge cases
 
 ### 2. Unit Testing Setup (Recommended)
 
-**Option A: Use GasTap Library (if available)**
-1. **Install GasTap Library:**
-   - In Apps Script, go to Libraries
-   - Try these Library IDs (use the first one that works):
-     - `1sHSS8UQPUZxLXSBNaZHGm1v5Lz4l0KJfqHvlIl3GqT7N9R7QJ4n_9Q-E`
-     - `MxL38OxqIK-B73jyDTvCe-OBao7QLBR4j`
-   - Select the latest version
-   - Set identifier to `GasTap`
-   - Click "Save"
-
-**Option B: Use Built-in Testing Framework (Recommended)**
+**Use Built-in Testing Framework**
 1. **Add Test Files:**
    - Create new script files: `SimpleTestFramework.js` and `SimpleTests.js`
    - Copy the respective code from this repository
@@ -91,7 +81,7 @@ runEdgeCaseTests();     // Test edge cases
 ## Configuration
 
 ### Switching Between Testing and Production
-In `Code.js`, line 77, change:
+In `Code.js`, line 223, change:
 ```javascript
 // For testing
 const counselorEmails = COUNSELOR_EMAILS.TESTING;
@@ -208,12 +198,8 @@ console.log(randomData.firstName, randomData.studentEmail);
 The codebase includes comprehensive JSDoc comments for API documentation:
 
 #### Generate Documentation
-**Option A: Online JSDoc Generator**
-1. Copy your JavaScript code
-2. Visit [JSDoc.app](https://jsdoc.app/)
-3. Paste code and generate HTML documentation
 
-**Option B: Local Generation (with Node.js)**
+**Option A: Local Generation (with Node.js)**
 ```bash
 # Install JSDoc globally
 npm install -g jsdoc
@@ -225,7 +211,7 @@ jsdoc Code.js SimpleTestFramework.js SimpleTests.js -c jsdoc.json -d docs
 open docs/index.html
 ```
 
-**Option C: VS Code Extension**
+**Option B: VS Code Extension**
 1. Install "JSDoc Generator" extension
 2. Use `Ctrl+Shift+P` → "Generate JSDoc"
 
