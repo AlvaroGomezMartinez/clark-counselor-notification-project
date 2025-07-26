@@ -220,7 +220,7 @@ function onFormSubmit(e) {
     }
 
     // Get counselor email configuration (change to 'PRODUCTION' for live deployment)
-    const counselorEmails = COUNSELOR_EMAILS.TESTING;
+    const counselorEmails = COUNSELOR_EMAILS.PRODUCTION;
     const counselorEmail = counselorEmails[formData.counselorName];
 
     if (!counselorEmail) {
