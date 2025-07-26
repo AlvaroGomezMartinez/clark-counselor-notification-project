@@ -1,14 +1,45 @@
 /** 
  * Clark Counselor Notification Project
- * Project Lead: Wendy Gomez, Counselor
- * Apps Script Development: Alvaro Gomez, Academic Technology Coach
- *  
- * Trigger: set to send the emails out when a form is submitted to the
- * spreadsheet that it is bound to.
+ * 
+ * @fileoverview Automated email notification system for counselor requests
+ * @description This Google Apps Script processes form submissions and sends 
+ *              email notifications to appropriate counselors based on student 
+ *              last name ranges and request urgency levels.
+ * 
+ * @author Alvaro Gomez, Academic Technology Coach
+ * @version 2.0.0
+ * @since 2025-07-26
+ * 
+ * @requires Google Apps Script
+ * @requires MailApp service
+ * @requires SpreadsheetApp service
+ * 
+ * @example
+ * // This script is triggered automatically on form submission
+ * // Manual testing can be done with:
+ * runAllTests();
+ * 
+ * @see {@link https://developers.google.com/apps-script} Google Apps Script Documentation
  */
 
 /**
  * Adds checkboxes to column K starting in row 2 for specified counselor sheets
+ * 
+ * @description This function iterates through predefined counselor sheet names
+ *              and adds checkboxes to column K for tracking completed requests.
+ *              Includes error handling and duplicate prevention.
+ * 
+ * @function addCheckboxesToCounselorSheets
+ * @memberof CounselorNotificationSystem
+ * 
+ * @throws {Error} When spreadsheet access fails or sheet operations error
+ * 
+ * @example
+ * // Called automatically on form submission
+ * addCheckboxesToCounselorSheets();
+ * 
+ * @see {@link addCheckboxesToSheet} Individual sheet checkbox handler
+ * @since 2.0.0
  */
 function addCheckboxesToCounselorSheets() {
   try {
@@ -133,8 +164,42 @@ const REASON_TYPES = {
 };
 
 /**
- * Main form submission handler
- * @param {Object} e - Form submission event object
+ * Main form submission handler and email dispatcher
+ * 
+ * @description Processes Google Form submissions, validates data, determines
+ *              appropriate counselor routing, sends email notifications, and
+ *              updates spreadsheet checkboxes. Handles both regular and
+ *              emergency request workflows.
+ * 
+ * @function onFormSubmit
+ * @memberof CounselorNotificationSystem
+ * 
+ * @param {Object} e - Form submission event object from Google Forms
+ * @param {Array<string>} e.values - Array of form response values
+ * @param {string} e.range - Range where form data was inserted
+ * @param {Object} e.source - Source spreadsheet object
+ * 
+ * @throws {Error} When counselor email mapping is not found
+ * @throws {Error} When form validation fails
+ * @throws {Error} When email sending fails
+ * 
+ * @example
+ * // Automatically triggered on form submission
+ * // Manual testing with mock data:
+ * const mockEvent = {
+ *   values: ['timestamp', 'student@email.com', 'Gomez (Cas-Fl)', '12345', 'Doe', 'John', 'Academic', 'Green', 'Self', '']
+ * };
+ * onFormSubmit(mockEvent);
+ * 
+ * @see {@link validateFormEvent} Form event validation
+ * @see {@link parseFormData} Data parsing
+ * @see {@link validateFormData} Data validation
+ * @see {@link composeEmail} Email composition
+ * @see {@link sendRegularEmail} Regular email sending
+ * @see {@link sendEmergencyEmail} Emergency email sending
+ * 
+ * @since 1.0.0
+ * @version 2.0.0
  */
 function onFormSubmit(e) {
   try {
