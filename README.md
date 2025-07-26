@@ -202,7 +202,47 @@ const randomData = TestUtils.generateRandomData();
 console.log(randomData.firstName, randomData.studentEmail);
 ```
 
-## Architecture
+## Documentation
+
+### JSDoc Documentation
+The codebase includes comprehensive JSDoc comments for API documentation:
+
+#### Generate Documentation
+**Option A: Online JSDoc Generator**
+1. Copy your JavaScript code
+2. Visit [JSDoc.app](https://jsdoc.app/)
+3. Paste code and generate HTML documentation
+
+**Option B: Local Generation (with Node.js)**
+```bash
+# Install JSDoc globally
+npm install -g jsdoc
+
+# Generate documentation
+jsdoc Code.js SimpleTestFramework.js SimpleTests.js -c jsdoc.json -d docs
+
+# Open generated documentation
+open docs/index.html
+```
+
+**Option C: VS Code Extension**
+1. Install "JSDoc Generator" extension
+2. Use `Ctrl+Shift+P` → "Generate JSDoc"
+
+#### JSDoc Features in Code
+- **Function Documentation** - All functions have complete parameter and return documentation
+- **Type Definitions** - Strong typing with TypeScript-style annotations
+- **Usage Examples** - Code examples for complex functions
+- **Cross-References** - Links between related functions
+- **Error Documentation** - All thrown exceptions documented
+
+#### Key Documentation Sections
+- **API Reference** - Complete function documentation
+- **Configuration Guide** - Setup and customization options  
+- **Testing Documentation** - Test framework usage
+- **Deployment Guide** - Step-by-step setup instructions
+
+### Architecture
 
 ### Main Functions
 - `onFormSubmit(e)` - Main trigger function
