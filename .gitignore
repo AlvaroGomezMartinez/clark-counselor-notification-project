@@ -9,3 +9,7 @@
 !index.html
 !.gitignore
 !.claspignore
+!SimpleTestFramework.js
+!SimpleTests.js
+!TestHelpers.js
+!Tests.js
