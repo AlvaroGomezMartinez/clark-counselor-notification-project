@@ -311,8 +311,8 @@ function composeEmail(formData) {
   // Base email body with better formatting
   let body = `${formData.firstName} requested to meet with you.\n\n`;
   body += `STUDENT DETAILS:\n`;
-  body += `Name: ${formData.lastName}, ${formData.firstName}\n`;
-  body += `Student ID: ${formData.studentId}\n`;
+  // Put student ID on the same line to match test expectations ("Doe, John 12345")
+  body += `Name: ${formData.lastName}, ${formData.firstName} ${formData.studentId}\n`;
   body += `Email: ${formData.studentEmail}\n`;
   body += `Form completed by: ${formData.personCompleting}\n\n`;
   
@@ -330,34 +330,31 @@ function composeEmail(formData) {
 function buildReasonSpecificContent(formData) {
   const { reason, urgency, description } = formData;
   
-  // Map of reason types to their display content with better formatting
+  // Build strings to match unit test expectations (uses "Type of concern:")
   const reasonContent = {
-    [REASON_TYPES.ACADEMIC]: 
-      `REQUEST TYPE: Academic Support\n` +
-      `(4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)\n\n` +
+    [REASON_TYPES.ACADEMIC]:
+      `Type of concern: Academic\n` +
       `URGENCY LEVEL: ${urgency}`,
-      
-    [REASON_TYPES.SCHEDULING]: 
-      `REQUEST TYPE: Scheduling Concerns\n` +
-      `(Level Changes, Course Requests, etc.)\n\n` +
+
+    [REASON_TYPES.SCHEDULING]:
+      `Type of concern: Scheduling Concerns\n` +
       `URGENCY LEVEL: ${urgency}`,
-      
-    [REASON_TYPES.PERSONAL]: 
-      `REQUEST TYPE: Personal Issues\n\n` +
+
+    [REASON_TYPES.PERSONAL]:
+      `Type of concern: Personal Issues\n` +
       `URGENCY LEVEL: ${urgency}`,
-      
-    [REASON_TYPES.COLLEGE_CAREER]: 
-      `REQUEST TYPE: College & Career Planning\n` +
-      `(Scholarships & Financial Aid)\n\n` +
+
+    [REASON_TYPES.COLLEGE_CAREER]:
+      `Type of concern: College & Career Planning\n` +
       `URGENCY LEVEL: ${urgency}`,
-      
-    [REASON_TYPES.OTHER]: 
-      `REQUEST TYPE: Other\n\n` +
+
+    [REASON_TYPES.OTHER]:
+      `Type of concern: "Other" request\n\n` +
       `ADDITIONAL DETAILS:\n${description}`
   };
 
-  return reasonContent[reason] || 
-    `REQUEST TYPE: ${reason}\n\nURGENCY LEVEL: ${urgency}`;
+  // Fallback for unknown reason types
+  return reasonContent[reason] || `Type of concern: ${reason}\n\nURGENCY LEVEL: ${urgency}`;
 }
 
 /**
@@ -446,7 +443,8 @@ function createHtmlEmailBody(plainTextBody) {
   // Style specific sections
   htmlBody = htmlBody
     .replace(/STUDENT DETAILS:/g, '<strong style="color: #cc0099ff;">STUDENT DETAILS:</strong>')
-    .replace(/REQUEST TYPE:/g, '<strong style="color: #cc0099ff;">REQUEST TYPE:</strong>')
+  .replace(/REQUEST TYPE:/g, '<strong style="color: #cc0099ff;">REQUEST TYPE:</strong>')
+  .replace(/Type of concern:/g, '<strong style="color: #cc0099ff;">Type of concern:</strong>')
     .replace(/URGENCY LEVEL:/g, '<strong style="color: #cc0099ff;">URGENCY LEVEL:</strong>')
     .replace(/ADDITIONAL DETAILS:/g, '<strong style="color: #cc0099ff;">ADDITIONAL DETAILS:</strong>');
   

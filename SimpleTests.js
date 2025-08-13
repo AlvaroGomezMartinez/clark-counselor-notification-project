@@ -378,8 +378,25 @@ function runEdgeCaseTests() {
  * Quick test runner for individual function testing
  */
 function quickTest(functionName) {
+  // If no function specified, show usage and run the full suite
+  if (!functionName) {
+    Logger.log('Usage: quickTest("parseFormData" | "validateFormData" | "composeEmail" | "buildReasonSpecificContent" | "isEmergencyRequest" | "integration" | "performance" | "edge")');
+    runAllTests();
+    return;
+  }
+
+  // Special shortcuts that manage their own runner
+  if (functionName === 'performance') {
+    runPerformanceTests();
+    return;
+  }
+  if (functionName === 'edge') {
+    runEdgeCaseTests();
+    return;
+  }
+
   const runner = new SimpleTestRunner();
-  
+
   switch(functionName) {
     case 'parseFormData':
       addParsingTests(runner);
@@ -390,14 +407,23 @@ function quickTest(functionName) {
     case 'composeEmail':
       addEmailTests(runner);
       break;
+    case 'buildReasonSpecificContent':
+      // Lives within the email tests
+      addEmailTests(runner);
+      break;
     case 'isEmergencyRequest':
       addEmergencyTests(runner);
       break;
+    case 'integration':
+      addIntegrationTests(runner);
+      break;
     default:
+      Logger.log(`Unknown function name: ${functionName}`);
+      Logger.log('Valid options: parseFormData, validateFormData, composeEmail, buildReasonSpecificContent, isEmergencyRequest, integration, performance, edge');
       runner.test('Unknown function', function() {
         this.assert(false, `Function ${functionName} not found in test suite`);
       });
   }
-  
+
   runner.runAll();
 }
