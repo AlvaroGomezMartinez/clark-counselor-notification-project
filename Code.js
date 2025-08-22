@@ -7,8 +7,8 @@
  *              last name ranges and request urgency levels.
  * 
  * @author Alvaro Gomez, Academic Technology Coach
- * @version 2.0.0
- * @since 2025-07-26
+ * @version 2.0.1
+ * @since 2025-08-22
  * 
  * @requires Google Apps Script
  * @requires MailApp service
@@ -138,7 +138,7 @@ const COUNSELOR_EMAILS = {
     'Guidry (Mek-Ph)': 'deborah.guidry@nisd.net',
     'Kosub (Pi-Sh)': 'stephanie.kosub@nisd.net',
     'Wellington (Si-Z)': 'ashley.wellington@nisd.net',
-    'Mrs. Martinez (College, Career, & Military Advisor)': 'yvonne-2.martinez@nisd.net',
+  // 'Mrs. Martinez (College, Career, & Military Advisor)': 'yvonne-2.martinez@nisd.net',
     'Head Counselor': 'marjan.switzer@nisd.net'
   },
   TESTING: {
@@ -149,7 +149,7 @@ const COUNSELOR_EMAILS = {
     'Guidry (Mek-Ph)': 'alvaro.gomez@nisd.net',
     'Kosub (Pi-Sh)': 'alvaro.gomez@nisd.net',
     'Wellington (Si-Z)': 'alvaro.gomez@nisd.net',
-    'Mrs. Martinez (College, Career, & Military Advisor)': 'alvaro.gomez@nisd.net',
+  // 'Mrs. Martinez (College, Career, & Military Advisor)': 'alvaro.gomez@nisd.net',
     'Head Counselor': 'alvaro.gomez@nisd.net'
   }
 };
@@ -198,8 +198,6 @@ const REASON_TYPES = {
  * @see {@link sendRegularEmail} Regular email sending
  * @see {@link sendEmergencyEmail} Emergency email sending
  * 
- * @since 1.0.0
- * @version 2.0.0
  */
 function onFormSubmit(e) {
   try {
@@ -223,20 +221,27 @@ function onFormSubmit(e) {
     const counselorEmails = COUNSELOR_EMAILS.PRODUCTION;
     const counselorEmail = counselorEmails[formData.counselorName];
 
-    if (!counselorEmail) {
-      throw new Error(`No email found for counselor: ${formData.counselorName}`);
-    }
 
     // Compose and send email
     const emailData = composeEmail(formData);
     const shouldSendToAll = isEmergencyRequest(formData);
 
+    // Always send to Mrs. Martinez if reason is COLLEGE_CAREER
+    const martinezEmail = 'yvonne-2.martinez@nisd.net';
+    const isCollegeCareer = formData.reason === REASON_TYPES.COLLEGE_CAREER;
+
     logEmailDetails(emailData, counselorEmail, shouldSendToAll);
-    
+
     if (shouldSendToAll) {
       sendEmergencyEmail(emailData, Object.values(counselorEmails));
+      if (isCollegeCareer) {
+        sendRegularEmail(emailData, martinezEmail);
+      }
     } else {
       sendRegularEmail(emailData, counselorEmail);
+      if (isCollegeCareer && counselorEmail !== martinezEmail) {
+        sendRegularEmail(emailData, martinezEmail);
+      }
     }
     
     // Add checkboxes to counselor sheets after processing the form submission
