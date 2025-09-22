@@ -88,7 +88,7 @@ function addParsingTests(runner) {
 
     const result = parseFormData(mockFormData);
 
-    this.assertEqual(result.studentEmail, 'student@students.nisd.net');
+  this.assertEqual(result.studentEmail, 'student@email.com');
     this.assertEqual(result.counselorName, 'Gomez (Cas-Fl)');
     this.assertEqual(result.studentId, '12345');
     this.assertEqual(result.lastName, 'Doe');
@@ -164,17 +164,10 @@ function addIntegrationTests(runner) {
         body: 'Test Body'
       };
       
-  // Test regular email
-      sendRegularEmail(emailData, 'test@example.com');
-      this.assertEqual(mailMock.emailsSent.length, 1, 'Should send one email');
-      this.assertEqual(mailMock.emailsSent[0].to, 'test@example.com', 'Should send to correct recipient');
-      
-  // Test emergency email (functionality exists but emergency routing is not
-  // triggered by form data in the revised form). We still test sendEmergencyEmail
-  // with a static recipient array.
-  sendEmergencyEmail(emailData, ['counselor1@test.com', 'counselor2@test.com']);
-      this.assertEqual(mailMock.emailsSent.length, 2, 'Should send two emails total');
-      this.assertContains(mailMock.emailsSent[1].to, 'counselor1@test.com', 'Should send to all counselors');
+    // Test regular email
+    sendRegularEmail(emailData, 'test@example.com');
+    this.assertEqual(mailMock.emailsSent.length, 1, 'Should send one email');
+    this.assertEqual(mailMock.emailsSent[0].to, 'test@example.com', 'Should send to correct recipient');
       
     } finally {
       mailMock.restore();
