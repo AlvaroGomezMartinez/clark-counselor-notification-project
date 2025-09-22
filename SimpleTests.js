@@ -1,6 +1,7 @@
 /**
  * Unit Tests using Simple Test Framework
  * No external library dependencies required
+ * @description Unit tests using Simple Test Framework (markdown fences removed)
  * 
  * To run tests, execute `runAllTests()` function
  */
@@ -15,7 +16,6 @@ function runAllTests() {
   addValidationTests(runner);
   addParsingTests(runner);
   addEmailTests(runner);
-  addEmergencyTests(runner);
   addIntegrationTests(runner);
   
   // Run all tests
@@ -48,7 +48,6 @@ function addValidationTests(runner) {
       firstName: 'John',
       lastName: 'Doe',
       counselorName: 'Gomez (Cas-Fl)',
-      reason: 'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)'
     };
     this.assertTruthy(validateFormData(validData));
   });
@@ -58,7 +57,6 @@ function addValidationTests(runner) {
       firstName: '',
       lastName: 'Doe',
       counselorName: 'Gomez (Cas-Fl)',
-      reason: 'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)'
     };
     this.assertFalsy(validateFormData(invalidData));
   });
@@ -68,7 +66,6 @@ function addValidationTests(runner) {
       firstName: 'John',
       lastName: '',
       counselorName: '',
-      reason: ''
     };
     this.assertFalsy(validateFormData(invalidData));
   });
@@ -86,23 +83,16 @@ function addParsingTests(runner) {
       '12345',               // STUDENT_ID
       'Doe',                 // LAST_NAME
       'John',                // FIRST_NAME
-      'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)', // REASON
-      'Green (I can wait a few days, not urgent.)', // URGENCY
-      'Parent - Jane Doe',   // PERSON_COMPLETING
-      'Additional info'      // DESCRIPTION
+      '10'                   // GRADE_LEVEL
     ];
-    
+
     const result = parseFormData(mockFormData);
-    
-    this.assertEqual(result.studentEmail, 'student@email.com');
+
+    this.assertEqual(result.studentEmail, 'student@students.nisd.net');
     this.assertEqual(result.counselorName, 'Gomez (Cas-Fl)');
     this.assertEqual(result.studentId, '12345');
     this.assertEqual(result.lastName, 'Doe');
     this.assertEqual(result.firstName, 'John');
-    this.assertContains(result.reason, 'Academic');
-    this.assertContains(result.urgency, 'Green');
-    this.assertEqual(result.personCompleting, 'Parent - Jane Doe');
-    this.assertEqual(result.description, 'Additional info');
   });
 
   runner.test('parseFormData should handle missing values gracefully', function() {
@@ -115,10 +105,10 @@ function addParsingTests(runner) {
   });
 
   runner.test('parseFormData should handle partial data', function() {
-    const partialData = ['timestamp', 'student@test.com', 'Gomez (Cas-Fl)'];
+    const partialData = ['timestamp', 'student@students.nisd.net', 'Gomez (Cas-Fl)'];
     const result = parseFormData(partialData);
     
-    this.assertEqual(result.studentEmail, 'student@test.com');
+    this.assertEqual(result.studentEmail, 'student@students.nisd.net');
     this.assertEqual(result.counselorName, 'Gomez (Cas-Fl)');
     this.assertEqual(result.studentId, ''); // Should be empty for missing data
   });
@@ -133,107 +123,17 @@ function addEmailTests(runner) {
       firstName: 'John',
       lastName: 'Doe',
       studentId: '12345',
-      studentEmail: 'john.doe@student.com',
-      personCompleting: 'Parent - Jane Doe',
-      reason: 'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)',
-      urgency: 'Green (I can wait a few days, not urgent.)',
-      description: 'Test description'
+      studentEmail: 'john.doe@students.nisd.net'
     };
     
     const result = composeEmail(mockFormData);
-    
+
     this.assertEqual(result.subject, CONFIG.EMAIL_SUBJECT);
     this.assertContains(result.body, 'John requested to meet with you');
     this.assertContains(result.body, 'Doe, John 12345');
-    this.assertContains(result.body, 'john.doe@student.com');
-    this.assertContains(result.body, 'Parent - Jane Doe');
+    this.assertContains(result.body, 'john.doe@students.nisd.net');
   });
 
-  runner.test('buildReasonSpecificContent should handle Academic reason', function() {
-    const formData = {
-      reason: REASON_TYPES.ACADEMIC,
-      urgency: 'Green (I can wait a few days, not urgent.)',
-      description: ''
-    };
-    
-    const result = buildReasonSpecificContent(formData);
-    this.assertContains(result, 'Type of concern: Academic');
-    this.assertContains(result, 'Green (I can wait a few days, not urgent.)');
-  });
-
-  runner.test('buildReasonSpecificContent should handle Other reason', function() {
-    const formData = {
-      reason: REASON_TYPES.OTHER,
-      urgency: 'Yellow (In the next day or two would be great.)',
-      description: 'Custom description here'
-    };
-    
-    const result = buildReasonSpecificContent(formData);
-    this.assertContains(result, 'Other" request');
-    this.assertContains(result, 'Custom description here');
-  });
-
-  runner.test('buildReasonSpecificContent should handle unknown reason', function() {
-    const formData = {
-      reason: 'Unknown Reason Type',
-      urgency: 'Red (It is an emergency, I need you as soon as possible, safety concern.)',
-      description: ''
-    };
-    
-    const result = buildReasonSpecificContent(formData);
-    this.assertContains(result, 'Type of concern: Unknown Reason Type');
-    this.assertContains(result, 'Red (It is an emergency');
-  });
-}
-
-/**
- * Test emergency detection logic
- */
-function addEmergencyTests(runner) {
-  runner.test('isEmergencyRequest should return true for emergency', function() {
-    const emergencyData = {
-      reason: REASON_TYPES.PERSONAL,
-      urgency: CONFIG.EMERGENCY_URGENCY
-    };
-    
-    this.assertTruthy(isEmergencyRequest(emergencyData));
-  });
-
-  runner.test('isEmergencyRequest should return false for non-emergency urgency', function() {
-    const nonEmergencyData = {
-      reason: REASON_TYPES.PERSONAL,
-      urgency: 'Green (I can wait a few days, not urgent.)'
-    };
-    
-    this.assertFalsy(isEmergencyRequest(nonEmergencyData));
-  });
-
-  runner.test('isEmergencyRequest should return false for Other reason type', function() {
-    const nonEmergencyData = {
-      reason: REASON_TYPES.OTHER,
-      urgency: CONFIG.EMERGENCY_URGENCY
-    };
-    
-    this.assertFalsy(isEmergencyRequest(nonEmergencyData));
-  });
-
-  runner.test('isEmergencyRequest should handle all emergency reason types', function() {
-    const emergencyReasons = [
-      REASON_TYPES.ACADEMIC,
-      REASON_TYPES.SCHEDULING,
-      REASON_TYPES.PERSONAL,
-      REASON_TYPES.COLLEGE_CAREER
-    ];
-    
-    for (const reason of emergencyReasons) {
-      const emergencyData = {
-        reason: reason,
-        urgency: CONFIG.EMERGENCY_URGENCY
-      };
-      
-      this.assertTruthy(isEmergencyRequest(emergencyData), `${reason} should be emergency`);
-    }
-  });
 }
 
 /**
@@ -248,25 +148,8 @@ function addIntegrationTests(runner) {
     const formData = parseFormData(mockEvent.values);
     const isValid = validateFormData(formData);
     const emailData = composeEmail(formData);
-    const isEmergency = isEmergencyRequest(formData);
     
     this.assertTruthy(isValid, 'Form data should be valid');
-    this.assertFalsy(isEmergency, 'Should not be detected as emergency');
-    this.assertEqual(emailData.subject, CONFIG.EMAIL_SUBJECT, 'Subject should match config');
-    this.assertContains(emailData.body, 'John requested to meet', 'Body should contain student name');
-  });
-
-  runner.test('Complete workflow should process emergency request correctly', function() {
-    // Mock emergency form submission
-    const mockEvent = TestDataFactory.createEmergencyFormEvent();
-    
-    const formData = parseFormData(mockEvent.values);
-    const isValid = validateFormData(formData);
-    const emailData = composeEmail(formData);
-    const isEmergency = isEmergencyRequest(formData);
-    
-    this.assertTruthy(isValid, 'Form data should be valid');
-    this.assertTruthy(isEmergency, 'Should be detected as emergency');
     this.assertEqual(emailData.subject, CONFIG.EMAIL_SUBJECT, 'Subject should match config');
     this.assertContains(emailData.body, 'John requested to meet', 'Body should contain student name');
   });
@@ -281,13 +164,15 @@ function addIntegrationTests(runner) {
         body: 'Test Body'
       };
       
-      // Test regular email
+  // Test regular email
       sendRegularEmail(emailData, 'test@example.com');
       this.assertEqual(mailMock.emailsSent.length, 1, 'Should send one email');
       this.assertEqual(mailMock.emailsSent[0].to, 'test@example.com', 'Should send to correct recipient');
       
-      // Test emergency email
-      sendEmergencyEmail(emailData, ['counselor1@test.com', 'counselor2@test.com']);
+  // Test emergency email (functionality exists but emergency routing is not
+  // triggered by form data in the revised form). We still test sendEmergencyEmail
+  // with a static recipient array.
+  sendEmergencyEmail(emailData, ['counselor1@test.com', 'counselor2@test.com']);
       this.assertEqual(mailMock.emailsSent.length, 2, 'Should send two emails total');
       this.assertContains(mailMock.emailsSent[1].to, 'counselor1@test.com', 'Should send to all counselors');
       
@@ -311,15 +196,14 @@ function runPerformanceTests() {
       const mockData = [
         'timestamp', testData.studentEmail, 'Gomez (Cas-Fl)', 
         testData.studentId, testData.lastName, testData.firstName,
-        'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)',
-        'Green (I can wait a few days, not urgent.)', 
-        'Parent', testData.description
+        `${9 + (i % 4)}`
       ];
       
       const formData = parseFormData(mockData);
       validateFormData(formData);
       composeEmail(formData);
-      isEmergencyRequest(formData);
+  // Emergency detection removed; keep placeholder variable for parity
+  const _isEmergency = false;
     }
     
     const duration = Date.now() - startTime;
@@ -380,7 +264,7 @@ function runEdgeCaseTests() {
 function quickTest(functionName) {
   // If no function specified, show usage and run the full suite
   if (!functionName) {
-    Logger.log('Usage: quickTest("parseFormData" | "validateFormData" | "composeEmail" | "buildReasonSpecificContent" | "isEmergencyRequest" | "integration" | "performance" | "edge")');
+    Logger.log('Usage: quickTest("parseFormData" | "validateFormData" | "composeEmail" | "integration" | "performance" | "edge")');
     runAllTests();
     return;
   }
@@ -407,19 +291,12 @@ function quickTest(functionName) {
     case 'composeEmail':
       addEmailTests(runner);
       break;
-    case 'buildReasonSpecificContent':
-      // Lives within the email tests
-      addEmailTests(runner);
-      break;
-    case 'isEmergencyRequest':
-      addEmergencyTests(runner);
-      break;
     case 'integration':
       addIntegrationTests(runner);
       break;
     default:
-      Logger.log(`Unknown function name: ${functionName}`);
-      Logger.log('Valid options: parseFormData, validateFormData, composeEmail, buildReasonSpecificContent, isEmergencyRequest, integration, performance, edge');
+  Logger.log(`Unknown function name: ${functionName}`);
+  Logger.log('Valid options: parseFormData, validateFormData, composeEmail, integration, performance, edge');
       runner.test('Unknown function', function() {
         this.assert(false, `Function ${functionName} not found in test suite`);
       });
