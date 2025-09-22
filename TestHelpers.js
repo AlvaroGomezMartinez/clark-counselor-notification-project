@@ -18,10 +18,7 @@ const TestDataFactory = {
       '12345',                       // STUDENT_ID
       'Doe',                         // LAST_NAME
       'John',                        // FIRST_NAME
-      'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)', // REASON
-      'Green (I can wait a few days, not urgent.)', // URGENCY
-      'Parent - Jane Doe',           // PERSON_COMPLETING
-      'Additional information'        // DESCRIPTION
+      '10'                          // GRADE_LEVEL (optional)
     ];
     
     // Apply overrides
@@ -34,16 +31,6 @@ const TestDataFactory = {
     });
     
     return { values: data };
-  },
-  
-  /**
-   * Creates an emergency form submission
-   */
-  createEmergencyFormEvent: function() {
-    return this.createValidFormEvent({
-      REASON: 'Personal Issues',
-      URGENCY: 'Red (It is an emergency, I need you as soon as possible, safety concern.)'
-    });
   },
   
   /**
@@ -165,9 +152,6 @@ function quickTest(functionName) {
     case 'composeEmail':
       testComposeEmail(test);
       break;
-    case 'isEmergencyRequest':
-      testIsEmergencyRequest(test);
-      break;
     default:
       test('Unknown function', function(t) {
         t.fail(`Function ${functionName} not found in test suite`);
@@ -244,9 +228,8 @@ function stressTest() {
         'Parent', testData.description
       ]);
       
-      validateFormData(formData);
-      composeEmail(formData);
-      isEmergencyRequest(formData);
+  validateFormData(formData);
+  composeEmail(formData);
     }
     
     const duration = Date.now() - startTime;
