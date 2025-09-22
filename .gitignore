@@ -11,5 +11,4 @@
 !.claspignore
 !SimpleTestFramework.js
 !SimpleTests.js
-!TestHelpers.js
-!Tests.js
+
