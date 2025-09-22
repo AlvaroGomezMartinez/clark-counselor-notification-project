@@ -7,8 +7,8 @@
  *              last name ranges and request urgency levels.
  * 
  * @author Alvaro Gomez, Academic Technology Coach
- * @version 2.0.1
- * @since 2025-08-22
+ * @version 2.0.2
+ * @since 2025-09-22
  * 
  * @requires Google Apps Script
  * @requires MailApp service
@@ -23,10 +23,10 @@
  */
 
 /**
- * Adds checkboxes to column K starting in row 2 for specified counselor sheets
+ * Adds checkboxes to column L starting in row 2 for specified counselor sheets
  * 
  * @description This function iterates through predefined counselor sheet names
- *              and adds checkboxes to column K for tracking completed requests.
+ *              and adds checkboxes to column L for tracking completed requests.
  *              Includes error handling and duplicate prevention.
  * 
  * @function addCheckboxesToCounselorSheets
@@ -39,7 +39,7 @@
  * addCheckboxesToCounselorSheets();
  * 
  * @see {@link addCheckboxesToSheet} Individual sheet checkbox handler
- * @since 2.0.0
+ * @since 2.0.2
  */
 function addCheckboxesToCounselorSheets() {
   try {
@@ -65,7 +65,8 @@ function addCheckboxesToCounselorSheets() {
 }
 
 /**
- * Adds checkboxes to column K for a specific sheet
+ * Adds checkboxes to column L for a specific sheet
+ * 
  * @param {Sheet} sheet - The sheet to add checkboxes to
  */
 function addCheckboxesToSheet(sheet) {
@@ -75,8 +76,8 @@ function addCheckboxesToSheet(sheet) {
     
     // Only proceed if there are rows beyond row 1 (header row)
     if (lastRow > 1) {
-      // Get the range from K2 to K[lastRow]
-      const checkboxRange = sheet.getRange(2, 11, lastRow - 1, 1); // Column K is column 11
+      // Get the range from L2 to L[lastRow]
+      const checkboxRange = sheet.getRange(2, 12, lastRow - 1, 1); // Column L is column 12
       
       // Check if checkboxes already exist in this range
       const existingValues = checkboxRange.getValues();
@@ -87,7 +88,7 @@ function addCheckboxesToSheet(sheet) {
       if (needsCheckboxes) {
         // Insert checkboxes (unchecked by default)
         checkboxRange.insertCheckboxes();
-        Logger.log(`Added ${lastRow - 1} checkboxes to column K in sheet: ${sheet.getName()}`);
+        Logger.log(`Added ${lastRow - 1} checkboxes to column L in sheet: ${sheet.getName()}`);
       } else {
         Logger.log(`Checkboxes already exist in sheet: ${sheet.getName()}`);
       }
@@ -116,15 +117,16 @@ const CONFIG = {
   
   // Form column indices (0-based)
   FORM_COLUMNS: {
-    STUDENT_EMAIL: 1,
-    COUNSELOR_NAME: 2,
-    STUDENT_ID: 3,
-    LAST_NAME: 4,
-    FIRST_NAME: 5,
-    REASON: 6,
-    URGENCY: 7,
-    PERSON_COMPLETING: 8,
-    DESCRIPTION: 9
+    STUDENT_EMAIL: 1, // Col B
+    COUNSELOR_NAME: 2, // Col C
+    STUDENT_ID: 3, // Col D
+    LAST_NAME: 4, // Col E
+    FIRST_NAME: 5, // Col F
+    GRADE_LEVEL: 6, // Col G
+    REASON: 7, // Col H 
+    URGENCY: 8, // Col I
+    PERSON_COMPLETING: 9, // Col J
+    DESCRIPTION: 10 // Col K
   }
 };
 
