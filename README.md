@@ -115,80 +115,12 @@ COUNSELOR_EMAILS: {
 
 ## Testing
 
-### Unit Tests Available
-- **Form Event Validation:** Tests form submission event handling
-- **Data Parsing:** Tests conversion of form arrays to structured objects
-- **Data Validation:** Tests required field validation
-- **Email Composition:** Tests email content generation
-- **Emergency Detection:** Tests logic for emergency vs. regular requests
-- **Email Sending:** Tests email routing logic (mocked)
-
-### Running Tests
-```javascript
-// Complete test suite
-runAllTests();              // All unit tests with built-in framework
-
-// Specialized test suites
-runPerformanceTests();      // Performance and speed tests
-runEdgeCaseTests();         // Edge cases and error handling
-
-// Individual function testing
-quickTest('parseFormData');      // Test specific function
-quickTest('validateFormData');   // Test validation logic
-quickTest('composeEmail');       // Test email composition
-
-// Note: GasTap-based tests have been removed from this repository.
-// The project now uses the built-in Simple Test Framework (no external
-// dependencies) which is documented above. If you previously used GasTap,
-// consider the removed files archived. For local Node-based test runs,
-// use the `tests/run_simple_tests_node.js` harness which loads
-// `Code.js`, `SimpleTestFramework.js`, and `SimpleTests.js`.
-```
-
 ### Built-in Test Framework Features
 The `SimpleTestFramework.js` provides:
 - **Assertions:** `assertEqual()`, `assertTruthy()`, `assertFalsy()`, `assertContains()`, `assertThrows()`
 - **Mocking:** `TestUtils.mockMailApp()`, `TestUtils.mockLogger()`
 - **Data Factory:** `TestDataFactory.createValidFormEvent()`, `TestDataFactory.createEmergencyFormEvent()`
 - **No Dependencies:** Works entirely within Google Apps Script environment
-
-### Test Data Factory
-Use `TestDataFactory` to create consistent test data:
-```javascript
-// Valid form submission
-const validEvent = TestDataFactory.createValidFormEvent();
-
-// Emergency request
-const emergencyEvent = TestDataFactory.createEmergencyFormEvent();
-
-// Invalid data for error testing
-const invalidEvent = TestDataFactory.createInvalidFormEvent();
-
-// Custom data with overrides
-const customEvent = TestDataFactory.createValidFormEvent({
-  FIRST_NAME: 'Maria',
-  URGENCY: 'Red (It is an emergency, I need you as soon as possible, safety concern.)'
-});
-```
-
-### Mock Utilities
-```javascript
-// Mock email sending for testing
-const mailMock = TestUtils.mockMailApp();
-sendRegularEmail(emailData, 'test@example.com');
-console.log(mailMock.emailsSent); // Check sent emails
-mailMock.restore(); // Restore original MailApp
-
-// Mock logging for testing
-const logMock = TestUtils.mockLogger();
-Logger.log('test message');
-console.log(logMock.logs); // Check logged messages
-logMock.restore(); // Restore original Logger
-
-// Generate random test data
-const randomData = TestUtils.generateRandomData();
-console.log(randomData.firstName, randomData.studentEmail);
-```
 
 ## Documentation
 
@@ -292,8 +224,9 @@ quickTest('validateFormData');
 ```
 
 ## Version History
-- **v2.0** - Complete refactor with unit testing support
-- **v1.0** - Original monolithic implementation 
+- **v3.0.0** - Updated script to match new Google Form fields that meet HB12 requirements 
+- **v2.0.0** - Complete refactor with unit testing support
+- **v1.0.0** - Original monolithic implementation 
 
 ### Changelog
 
