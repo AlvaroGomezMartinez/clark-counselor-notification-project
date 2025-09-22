@@ -20,8 +20,6 @@ function runAllTests() {
   testParseFormData(test);
   testValidateFormData(test);
   testComposeEmail(test);
-  testBuildReasonSpecificContent(test);
-  testIsEmergencyRequest(test);
   testEmailSending(test);
   
   // Finish and display results
@@ -69,10 +67,7 @@ function testParseFormData(test) {
     '12345',               // 3 - STUDENT_ID
     'Doe',                 // 4 - LAST_NAME
     'John',                // 5 - FIRST_NAME
-    'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)', // 6 - REASON
-    'Green (I can wait a few days, not urgent.)', // 7 - URGENCY
-    'Parent - Jane Doe',   // 8 - PERSON_COMPLETING
-    'Additional info'      // 9 - DESCRIPTION
+    '10'                   // 6 - GRADE_LEVEL
   ];
   
   test('parseFormData should correctly parse form values', 
@@ -84,10 +79,9 @@ function testParseFormData(test) {
       t.equal(result.studentId, '12345');
       t.equal(result.lastName, 'Doe');
       t.equal(result.firstName, 'John');
-      t.equal(result.reason, 'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)');
-      t.equal(result.urgency, 'Green (I can wait a few days, not urgent.)');
-      t.equal(result.personCompleting, 'Parent - Jane Doe');
-      t.equal(result.description, 'Additional info');
+      t.equal(result.studentId, '12345');
+      t.equal(result.lastName, 'Doe');
+      t.equal(result.firstName, 'John');
     });
   
   // Test with missing values
@@ -109,7 +103,6 @@ function testValidateFormData(test) {
     firstName: 'John',
     lastName: 'Doe',
     counselorName: 'Gomez (Cas-Fl)',
-    reason: 'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)',
     studentEmail: 'student@email.com'
   };
   
@@ -149,10 +142,6 @@ function testComposeEmail(test) {
     lastName: 'Doe',
     studentId: '12345',
     studentEmail: 'john.doe@student.com',
-    personCompleting: 'Parent - Jane Doe',
-    reason: 'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)',
-    urgency: 'Green (I can wait a few days, not urgent.)',
-    description: 'Test description'
   };
   
   test('composeEmail should create properly formatted email', 
@@ -167,90 +156,7 @@ function testComposeEmail(test) {
     });
 }
 
-/**
- * Test buildReasonSpecificContent function
- */
-function testBuildReasonSpecificContent(test) {
-  // Test Academic reason
-  test('buildReasonSpecificContent should handle Academic reason', 
-    function(t) {
-      const formData = {
-        reason: REASON_TYPES.ACADEMIC,
-        urgency: 'Green (I can wait a few days, not urgent.)',
-        description: ''
-      };
-      
-      const result = buildReasonSpecificContent(formData);
-      t.ok(result.includes('Type of concern: Academic'));
-      t.ok(result.includes('Green (I can wait a few days, not urgent.)'));
-    });
-  
-  // Test Other reason
-  test('buildReasonSpecificContent should handle Other reason', 
-    function(t) {
-      const formData = {
-        reason: REASON_TYPES.OTHER,
-        urgency: 'Yellow (In the next day or two would be great.)',
-        description: 'Custom description here'
-      };
-      
-      const result = buildReasonSpecificContent(formData);
-      t.ok(result.includes('Other" request'));
-      t.ok(result.includes('Custom description here'));
-    });
-  
-  // Test unknown reason
-  test('buildReasonSpecificContent should handle unknown reason', 
-    function(t) {
-      const formData = {
-        reason: 'Unknown Reason Type',
-        urgency: 'Red (It is an emergency, I need you as soon as possible, safety concern.)',
-        description: ''
-      };
-      
-      const result = buildReasonSpecificContent(formData);
-      t.ok(result.includes('Type of concern: Unknown Reason Type'));
-      t.ok(result.includes('Red (It is an emergency'));
-    });
-}
-
-/**
- * Test isEmergencyRequest function
- */
-function testIsEmergencyRequest(test) {
-  // Test emergency request
-  test('isEmergencyRequest should return true for emergency', 
-    function(t) {
-      const emergencyData = {
-        reason: REASON_TYPES.PERSONAL,
-        urgency: CONFIG.EMERGENCY_URGENCY
-      };
-      
-      t.equal(isEmergencyRequest(emergencyData), true);
-    });
-  
-  // Test non-emergency request (wrong urgency)
-  test('isEmergencyRequest should return false for non-emergency urgency', 
-    function(t) {
-      const nonEmergencyData = {
-        reason: REASON_TYPES.PERSONAL,
-        urgency: 'Green (I can wait a few days, not urgent.)'
-      };
-      
-      t.equal(isEmergencyRequest(nonEmergencyData), false);
-    });
-  
-  // Test non-emergency request (Other reason type)
-  test('isEmergencyRequest should return false for Other reason type', 
-    function(t) {
-      const nonEmergencyData = {
-        reason: REASON_TYPES.OTHER,
-        urgency: CONFIG.EMERGENCY_URGENCY
-      };
-      
-      t.equal(isEmergencyRequest(nonEmergencyData), false);
-    });
-}
+// Emergency detection tests removed - revised form does not include reason/urgency
 
 /**
  * Test email sending functions (mock tests)
@@ -316,10 +222,7 @@ function testCompleteWorkflow() {
       '12345',                       // STUDENT_ID
       'Doe',                         // LAST_NAME
       'John',                        // FIRST_NAME
-      'Personal Issues',             // REASON
-      'Red (It is an emergency, I need you as soon as possible, safety concern.)', // URGENCY
-      'Parent - Jane Doe',           // PERSON_COMPLETING
-      'Student is having difficulties' // DESCRIPTION
+      '11'                           // GRADE_LEVEL (optional)
     ]
   };
   
@@ -339,10 +242,8 @@ function testCompleteWorkflow() {
         const formData = parseFormData(mockEvent.values);
         const isValid = validateFormData(formData);
         const emailData = composeEmail(formData);
-        const isEmergency = isEmergencyRequest(formData);
         
         t.ok(isValid, 'Form data should be valid');
-        t.ok(isEmergency, 'Should be detected as emergency');
         t.ok(emailData.subject === CONFIG.EMAIL_SUBJECT, 'Subject should match config');
         t.ok(emailData.body.includes('John requested to meet'), 'Body should contain student name');
         
@@ -370,15 +271,12 @@ function testPerformance() {
         const mockData = [
           'timestamp', `student${i}@test.com`, 'Gomez (Cas-Fl)', 
           `1234${i}`, `LastName${i}`, `FirstName${i}`, 
-          'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)',
-          'Green (I can wait a few days, not urgent.)', 
-          `Parent ${i}`, `Description ${i}`
+          `${9 + (i % 4)}` // grade level (sample)
         ];
         
         const formData = parseFormData(mockData);
         validateFormData(formData);
         composeEmail(formData);
-        isEmergencyRequest(formData);
       }
       
       const endTime = new Date().getTime();
