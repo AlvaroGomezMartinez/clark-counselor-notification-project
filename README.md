@@ -38,7 +38,7 @@ runEdgeCaseTests();     // Test edge cases
 - Automatic email routing to assigned counselor based on student last name ranges
 - Emergency notifications sent to all counselors when urgent
 - Error handling and admin notifications
-- Comprehensive unit testing with GasTap
+- Built-in unit testing via the Simple Test Framework (no external dependencies)
 
 ## Setup
 
@@ -137,14 +137,12 @@ quickTest('parseFormData');      // Test specific function
 quickTest('validateFormData');   // Test validation logic
 quickTest('composeEmail');       // Test email composition
 
-// Alternative: If using GasTap library
-function runTestsWithGasTap() {
-  runAllTests();           // All unit tests
-  testCompleteWorkflow();  // Integration tests
-  testEdgeCases();         // Edge case handling
-  testPerformance();       // Performance tests
-  stressTest();           // Stress testing
-}
+// Note: GasTap-based tests have been removed from this repository.
+// The project now uses the built-in Simple Test Framework (no external
+// dependencies) which is documented above. If you previously used GasTap,
+// consider the removed files archived. For local Node-based test runs,
+// use the `tests/run_simple_tests_node.js` harness which loads
+// `Code.js`, `SimpleTestFramework.js`, and `SimpleTests.js`.
 ```
 
 ### Built-in Test Framework Features
@@ -235,7 +233,6 @@ open docs/index.html
 - `parseFormData(values)` - Converts form array to structured object
 - `validateFormData(formData)` - Validates required fields
 - `composeEmail(formData)` - Creates email content
-- `isEmergencyRequest(formData)` - Determines if emergency routing needed
 - `sendRegularEmail()` / `sendEmergencyEmail()` - Email routing functions
 
 ### Error Handling
@@ -281,7 +278,7 @@ open docs/index.html
 ### Common Issues
 - **"No email found for counselor"**: Check counselor name mapping in form vs. `COUNSELOR_EMAILS`
 - **Form validation errors**: Verify form column indices in `CONFIG.FORM_COLUMNS`
-- **Test failures**: Ensure GasTap library is properly installed and configured
+- **Test failures**: Ensure test files (`SimpleTestFramework.js`, `SimpleTests.js`) are present and up to date
 
 ### Debugging
 ```javascript
@@ -297,3 +294,12 @@ quickTest('validateFormData');
 ## Version History
 - **v2.0** - Complete refactor with unit testing support
 - **v1.0** - Original monolithic implementation 
+
+### Changelog
+
+- 2025-09-22 (v3.0.0) — Form simplified and notification behavior updated
+  - Removed form fields: type of concern, urgency level, person completing the form, and freeform description.
+  - Script updated to stop parsing/validating those fields; email composition simplified.
+  - Notifications now go only to the assigned counselor when a student schedules an appointment.
+  - Emergency/all-counselor broadcast and reason-specific content removed (placeholder kept for future reintroduction).
+  - Unit tests and test helpers updated to match the new form layout; a local Node harness was added for quick test runs.
