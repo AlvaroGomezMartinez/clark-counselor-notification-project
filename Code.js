@@ -1,4 +1,4 @@
-/** 
+/**
  * Clark Counselor Notification Project
  * 
  * @fileoverview Automated email notification system for counselor requests
@@ -7,7 +7,7 @@
  *              last name ranges and request urgency levels.
  * 
  * @author Alvaro Gomez, Academic Technology Coach
- * @version 2.0.2
+ * @version 3.0.0
  * @since 2025-09-22
  * 
  * @requires Google Apps Script
@@ -15,12 +15,21 @@
  * @requires SpreadsheetApp service
  * 
  * @example
- * // This script is triggered automatically on form submission
- * // Manual testing can be done with:
- * runAllTests();
+ * This script is triggered automatically on form submission
+ * Manual testing can be done with:
+ *      runAllTests();
  * 
  * @see {@link https://developers.google.com/apps-script} Google Apps Script Documentation
  */
+
+/**
+ * Changelog (2025-09-22):
+ * - The Google Form was revised to remove fields for type of concern, level of urgency,
+ * the person completing the form, and a freeform description field.
+ * - As a result, this script was updated to stop referencing those fields. It now only parses the
+ * core student fields (name, student ID, email) and the selected counselor, and it
+ * emails the assigned counselor that the student scheduled an appointment.
+*/
 
 /**
  * Adds checkboxes to column L starting in row 2 for specified counselor sheets
@@ -113,7 +122,6 @@ function refreshCheckboxes() {
 const CONFIG = {
   ADMIN_EMAIL: 'alvaro.gomez@nisd.net',
   EMAIL_SUBJECT: 'REQUEST TO SEE COUNSELOR',
-  EMERGENCY_URGENCY: 'Red (It is an emergency, I need you as soon as possible, safety concern.)',
   
   // Form column indices (0-based)
   FORM_COLUMNS: {
@@ -123,10 +131,6 @@ const CONFIG = {
     LAST_NAME: 4, // Col E
     FIRST_NAME: 5, // Col F
     GRADE_LEVEL: 6, // Col G
-    REASON: 7, // Col H 
-    URGENCY: 8, // Col I
-    PERSON_COMPLETING: 9, // Col J
-    DESCRIPTION: 10 // Col K
   }
 };
 
@@ -140,7 +144,7 @@ const COUNSELOR_EMAILS = {
     'Guidry (Mek-Ph)': 'deborah.guidry@nisd.net',
     'Kosub (Pi-Sh)': 'stephanie.kosub@nisd.net',
     'Wellington (Si-Z)': 'ashley.wellington@nisd.net',
-  // 'Mrs. Martinez (College, Career, & Military Advisor)': 'yvonne-2.martinez@nisd.net',
+    'Mrs. Martinez (College, Career, & Military Advisor)': 'yvonne-2.martinez@nisd.net',
     'Head Counselor': 'marjan.switzer@nisd.net'
   },
   TESTING: {
@@ -151,18 +155,9 @@ const COUNSELOR_EMAILS = {
     'Guidry (Mek-Ph)': 'alvaro.gomez@nisd.net',
     'Kosub (Pi-Sh)': 'alvaro.gomez@nisd.net',
     'Wellington (Si-Z)': 'alvaro.gomez@nisd.net',
-  // 'Mrs. Martinez (College, Career, & Military Advisor)': 'alvaro.gomez@nisd.net',
+    'Mrs. Martinez (College, Career, & Military Advisor)': 'alvaro.gomez@nisd.net',
     'Head Counselor': 'alvaro.gomez@nisd.net'
   }
-};
-
-// Reason types and their display names
-const REASON_TYPES = {
-  ACADEMIC: 'Academic (4 Year Planning, Transcripts, Credits, Grade Level, Letters of Recommendation)',
-  SCHEDULING: 'Scheduling Concerns (Level Changes, Course Requests, etc)',
-  PERSONAL: 'Personal Issues',
-  COLLEGE_CAREER: 'College & Career Planning, Scholarships, & Financial Aid (Select Mrs. Martinez as Counselor)',
-  OTHER: 'Other'
 };
 
 /**
@@ -189,7 +184,7 @@ const REASON_TYPES = {
  * // Automatically triggered on form submission
  * // Manual testing with mock data:
  * const mockEvent = {
- *   values: ['timestamp', 'student@email.com', 'Gomez (Cas-Fl)', '12345', 'Doe', 'John', 'Academic', 'Green', 'Self', '']
+ *   values: ['timestamp', 'student@email.com', 'Gomez (Cas-Fl)', '123456', 'Doe', 'John', '12']
  * };
  * onFormSubmit(mockEvent);
  * 
@@ -198,7 +193,6 @@ const REASON_TYPES = {
  * @see {@link validateFormData} Data validation
  * @see {@link composeEmail} Email composition
  * @see {@link sendRegularEmail} Regular email sending
- * @see {@link sendEmergencyEmail} Emergency email sending
  * 
  */
 function onFormSubmit(e) {
@@ -219,32 +213,21 @@ function onFormSubmit(e) {
       return;
     }
 
-    // Get counselor email configuration (change to 'PRODUCTION' for live deployment)
+    // Get counselor email configuration (change to 'PRODUCTION' for live deployment
+    // change to 'TESTING' for testing with own email)
     const counselorEmails = COUNSELOR_EMAILS.PRODUCTION;
     const counselorEmail = counselorEmails[formData.counselorName];
 
-
-    // Compose and send email
+    // Compose and send email to the assigned counselor only
     const emailData = composeEmail(formData);
-    const shouldSendToAll = isEmergencyRequest(formData);
 
-    // Always send to Mrs. Martinez if reason is COLLEGE_CAREER
-    const martinezEmail = 'yvonne-2.martinez@nisd.net';
-    const isCollegeCareer = formData.reason === REASON_TYPES.COLLEGE_CAREER;
+    logEmailDetails(emailData, counselorEmail, false);
 
-    logEmailDetails(emailData, counselorEmail, shouldSendToAll);
-
-    if (shouldSendToAll) {
-      sendEmergencyEmail(emailData, Object.values(counselorEmails));
-      if (isCollegeCareer) {
-        sendRegularEmail(emailData, martinezEmail);
-      }
-    } else {
-      sendRegularEmail(emailData, counselorEmail);
-      if (isCollegeCareer && counselorEmail !== martinezEmail) {
-        sendRegularEmail(emailData, martinezEmail);
-      }
+    if (!counselorEmail) {
+      throw new Error(`Counselor email not found for: ${formData.counselorName}`);
     }
+
+    sendRegularEmail(emailData, counselorEmail);
     
     // Add checkboxes to counselor sheets after processing the form submission
     addCheckboxesToCounselorSheets();
@@ -276,16 +259,13 @@ function validateFormEvent(e) {
 function parseFormData(values) {
   const cols = CONFIG.FORM_COLUMNS;
   
+  // Only parse and return the fields that are still present in the updated form
   return {
     studentEmail: values[cols.STUDENT_EMAIL] || '',
     counselorName: values[cols.COUNSELOR_NAME] || '',
     studentId: values[cols.STUDENT_ID] || '',
     lastName: values[cols.LAST_NAME] || '',
-    firstName: values[cols.FIRST_NAME] || '',
-    reason: values[cols.REASON] || '',
-    urgency: values[cols.URGENCY] || '',
-    personCompleting: values[cols.PERSON_COMPLETING] || '',
-    description: values[cols.DESCRIPTION] || ''
+    firstName: values[cols.FIRST_NAME] || ''
   };
 }
 
@@ -295,7 +275,8 @@ function parseFormData(values) {
  * @returns {boolean} True if valid, false otherwise
  */
 function validateFormData(formData) {
-  const requiredFields = ['firstName', 'lastName', 'counselorName', 'reason'];
+  // Require the student's name and target counselor
+  const requiredFields = ['firstName', 'lastName', 'counselorName'];
   
   for (const field of requiredFields) {
     if (!formData[field] || formData[field].trim() === '') {
@@ -320,11 +301,9 @@ function composeEmail(formData) {
   body += `STUDENT DETAILS:\n`;
   // Put student ID on the same line to match test expectations ("Doe, John 12345")
   body += `Name: ${formData.lastName}, ${formData.firstName} ${formData.studentId}\n`;
-  body += `Email: ${formData.studentEmail}\n`;
-  body += `Form completed by: ${formData.personCompleting}\n\n`;
-  
-  // Add reason-specific content
-  body += buildReasonSpecificContent(formData);
+    body += `Email: ${formData.studentEmail}\n\n`;
+    body += `This student requested an appointment with you via the online form.\n\n`;
+  body += `If you need additional details, please contact the student at the email above or review the form responses spreadsheet.\n`;
 
   return { subject, body };
 }
@@ -334,82 +313,21 @@ function composeEmail(formData) {
  * @param {Object} formData - Parsed form data
  * @returns {string} Reason-specific content
  */
-function buildReasonSpecificContent(formData) {
-  const { reason, urgency, description } = formData;
-  
-  // Build strings to match unit test expectations (uses "Type of concern:")
-  const reasonContent = {
-    [REASON_TYPES.ACADEMIC]:
-      `Type of concern: Academic\n` +
-      `URGENCY LEVEL: ${urgency}`,
-
-    [REASON_TYPES.SCHEDULING]:
-      `Type of concern: Scheduling Concerns\n` +
-      `URGENCY LEVEL: ${urgency}`,
-
-    [REASON_TYPES.PERSONAL]:
-      `Type of concern: Personal Issues\n` +
-      `URGENCY LEVEL: ${urgency}`,
-
-    [REASON_TYPES.COLLEGE_CAREER]:
-      `Type of concern: College & Career Planning\n` +
-      `URGENCY LEVEL: ${urgency}`,
-
-    [REASON_TYPES.OTHER]:
-      `Type of concern: "Other" request\n\n` +
-      `ADDITIONAL DETAILS:\n${description}`
-  };
-
-  // Fallback for unknown reason types
-  return reasonContent[reason] || `Type of concern: ${reason}\n\nURGENCY LEVEL: ${urgency}`;
-}
-
-/**
- * Determines if the request is an emergency requiring all counselors
- * @param {Object} formData - Parsed form data
- * @returns {boolean} True if emergency, false otherwise
- */
-function isEmergencyRequest(formData) {
-  const { reason, urgency } = formData;
-  
-  const emergencyReasons = [
-    REASON_TYPES.ACADEMIC,
-    REASON_TYPES.SCHEDULING,
-    REASON_TYPES.PERSONAL,
-    REASON_TYPES.COLLEGE_CAREER
-  ];
-  
-  return emergencyReasons.includes(reason) && urgency === CONFIG.EMERGENCY_URGENCY;
-}
+// Reason-specific content and emergency detection removed because the form
+// no longer provides those fields. Any emergency logic should be reintroduced
+// explicitly if future forms add urgency/reason fields.
 
 /**
  * Logs email details for debugging
  * @param {Object} emailData - Email subject and body
  * @param {string} counselorEmail - Target counselor email
- * @param {boolean} isEmergency - Whether this is an emergency email
  */
-function logEmailDetails(emailData, counselorEmail, isEmergency) {
+function logEmailDetails(emailData, counselorEmail) {
   Logger.log("Email Details:", {
-    to: isEmergency ? "All Counselors" : counselorEmail,
-    isEmergency: isEmergency,
+    to: counselorEmail,
     subject: emailData.subject,
     body: emailData.body
   });
-}
-
-/**
- * Sends emergency email to all counselors
- * @param {Object} emailData - Email subject and body
- * @param {Array} allEmails - Array of all counselor emails
- */
-function sendEmergencyEmail(emailData, allEmails) {
-  MailApp.sendEmail({
-    to: allEmails.join(','),
-    subject: emailData.subject,
-    body: emailData.body,
-    htmlBody: createHtmlEmailBody(emailData.body)
-  });
-  Logger.log("Emergency email sent to all counselors");
 }
 
 /**
@@ -426,6 +344,7 @@ function sendRegularEmail(emailData, counselorEmail) {
   });
   Logger.log(`Regular email sent to: ${counselorEmail}`);
 }
+
 
 /**
  * Creates HTML version of email body for better formatting
@@ -450,18 +369,9 @@ function createHtmlEmailBody(plainTextBody) {
   // Style specific sections
   htmlBody = htmlBody
     .replace(/STUDENT DETAILS:/g, '<strong style="color: #cc0099ff;">STUDENT DETAILS:</strong>')
-  .replace(/REQUEST TYPE:/g, '<strong style="color: #cc0099ff;">REQUEST TYPE:</strong>')
-  .replace(/Type of concern:/g, '<strong style="color: #cc0099ff;">Type of concern:</strong>')
-    .replace(/URGENCY LEVEL:/g, '<strong style="color: #cc0099ff;">URGENCY LEVEL:</strong>')
-    .replace(/ADDITIONAL DETAILS:/g, '<strong style="color: #cc0099ff;">ADDITIONAL DETAILS:</strong>');
-  
+    .replace(/form responses spreadsheet./g, '<a href="https://docs.google.com/spreadsheets/d/1ctKPtO7lRyCkJDPmZOARo2UpZVNj_Myroriu1QfHu9c/edit?gid=635077212#gid=635077212">form responses spreadsheet.');
   return htmlBody;
 }
-
-/**
- * Sends error notification email to administrator
- * @param {Error} error - The error object
- */
 function sendErrorNotificationEmail(error) {
   try {
     const errorSubject = 'Error Notification: Script Execution Issue';
